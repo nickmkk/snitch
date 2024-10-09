@@ -31,6 +31,22 @@ namespace Sntich.Tests
         }
 
         [Fact]
+        [Expectation("Boom", "Default")]
+        public async Task Should_Return_Expected_Result_For_Boom_Not_Specifying_Framework()
+        {
+            // Given
+            var fixture = new Fixture();
+            var project = Fixture.GetPath("Boom/Boom.csproj");
+
+            // When
+            var (exitCode, output) = await Fixture.Run(project);
+
+            // Then
+            exitCode.ShouldBe(0);
+            await Verifier.Verify(output);
+        }
+
+        [Fact]
         [Expectation("Solution", "Default")]
         public async Task Should_Return_Expected_Result_For_Solution_Not_Specifying_Framework()
         {

@@ -1,13 +1,16 @@
+using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
+using Snitch.Analysis;
+using Snitch.Analysis.Utilities;
+using Spectre.Console;
+using Spectre.Console.Cli;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using Snitch.Analysis;
-using Snitch.Analysis.Utilities;
-using Spectre.Console;
-using Spectre.Console.Cli;
 
 namespace Snitch.Commands
 {
@@ -73,6 +76,9 @@ namespace Snitch.Commands
 
             return _console.Status().Start($"Analyzing...", ctx =>
             {
+                using var sourceCacheContext = new SourceCacheContext();
+                var resolvedPackages = new ConcurrentDictionary<PackageIdentity, SourcePackageDependencyInfo>(PackageIdentityComparer.Default);
+
                 ctx.Refresh();
 
                 _console.MarkupLine($"Analyzing [yellow]{Path.GetFileName(entry)}[/]");
@@ -94,7 +100,7 @@ namespace Snitch.Commands
                     }
 
                     // Analyze the project.
-                    var analyzeResult = _analyzer.Analyze(buildResult.Project);
+                    var analyzeResult = _analyzer.Analyze(buildResult.Project, sourceCacheContext, resolvedPackages);
                     if (settings.Exclude?.Length > 0)
                     {
                         // Filter packages that should be excluded.

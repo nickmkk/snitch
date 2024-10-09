@@ -41,9 +41,10 @@ namespace Snitch.Analysis
                     table.AddColumns("[grey]Package[/]", "[grey]Referenced by[/]");
                     foreach (var item in result.CanBeRemoved)
                     {
+                        string refName = item.Original.Project.Name != item.Project.Name ? item.Original.Project.Name : item.Original.Package.Name;
                         table.AddRow(
                             $"[green]{item.Package.Name}[/]",
-                            $"[aqua]{item.Original.Project.Name}[/]");
+                            $"[aqua]{refName}[/]");
                     }
 
                     report.AddRow($" [yellow]Packages that can be removed from[/] [aqua]{result.Project}[/]:");

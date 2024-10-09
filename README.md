@@ -26,6 +26,7 @@ Analyzing Quux...
 Analyzing Quuux...
 Analyzing Thud...
 Analyzing Thuuud...
+Analyzing Boom...
 
 ╭─────────────────────────────────────────────────────────────────╮
 │  Packages that can be removed from Bar:                         │
@@ -41,6 +42,13 @@ Analyzing Thuuud...
 │ ├──────────────────────┼──────────────────────────────────────┤ │
 │ │ Autofac              │ Foo                                  │ │
 │ └──────────────────────┴──────────────────────────────────────┘ │
+│                                                                 │
+│  Packages that can be removed from Boom:                        │
+│ ┌────────────────────────────────────┬────────────────────────┐ │
+│ │ Package                            │ Referenced by          │ │
+│ ├────────────────────────────────────┼────────────────────────┤ │
+│ │ Serilog.Extensions.Hosting         │ Serilog.AspNetCore     │ │
+│ └────────────────────────────────────┴────────────────────────┘ │
 │                                                                 │
 │  Packages that might be removed from Qux:                       │
 │ ┌───────────┬───────────┬─────────────────────────────────────┐ │
@@ -65,7 +73,7 @@ Analyzing Thuuud...
 │ └─────────────────┴──────────────┴────────────────────────────┘ │
 ╰─────────────────────────────────────────────────────────────────╯
 ```
-<sup><a href='/src/Snitch.Tests/Expectations/Solution.Default.verified.txt#L1-L49' title='Snippet source file'>snippet source</a> | <a href='#snippet-Solution.Default.verified.txt' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Snitch.Tests/Expectations/Solution.Default.verified.txt#L1-L57' title='Snippet source file'>snippet source</a> | <a href='#snippet-Solution.Default.verified.txt' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 ## Installation
