@@ -1,16 +1,20 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
+using Depends.Core.Graph;
+using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
+using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.Protocol.Core.Types;
 
 namespace Snitch.Analysis
 {
     internal sealed class ProjectAnalyzer
     {
-        public ProjectAnalyzerResult Analyze(Project project)
+        public ProjectAnalyzerResult Analyze(Project project,  SourceCacheContext sourceCacheContext, ConcurrentDictionary<PackageIdentity, SourcePackageDependencyInfo> resolvedPackages)
         {
             if (project == null)
             {
@@ -19,7 +23,7 @@ namespace Snitch.Analysis
 
             // Analyze the project.
             var result = new List<PackageToRemove>();
-            AnalyzeProject(project, project, result);
+            AnalyzeProject(project, project, result, sourceCacheContext, resolvedPackages);
 
             if (project.LockFilePath != null)
             {
@@ -31,7 +35,7 @@ namespace Snitch.Analysis
             return new ProjectAnalyzerResult(project, result);
         }
 
-        private List<ProjectPackage> AnalyzeProject(Project root, Project project, List<PackageToRemove> result)
+        private List<ProjectPackage> AnalyzeProject(Project root, Project project, List<PackageToRemove> result, SourceCacheContext sourceCacheContext, ConcurrentDictionary<PackageIdentity, SourcePackageDependencyInfo> resolvedPackages)
         {
             var accumulated = new List<ProjectPackage>();
             result ??= new List<PackageToRemove>();
@@ -42,12 +46,12 @@ namespace Snitch.Analysis
                 foreach (var child in project.ProjectReferences)
                 {
                     // Analyze the project recursively.
-                    foreach (var item in AnalyzeProject(root, child, result))
+                    foreach (var item in AnalyzeProject(root, child, result, sourceCacheContext, resolvedPackages))
                     {
                         // Didn't exist previously in the list of accumulated packages?
                         if (!accumulated.ContainsPackage(item.Package))
                         {
-                            accumulated.Add(new ProjectPackage(item.Project, item.Package));
+                            accumulated.Add(new ProjectPackage(item.Project, item.Package, sourceCacheContext, resolvedPackages));
                         }
                     }
                 }
@@ -86,13 +90,24 @@ namespace Snitch.Analysis
 
             void AddToAccumulated(Package package)
             {
-                if (package.PrivateAssets != null && package.PrivateAssets.Contains("compile"))
+                if (package.PrivateAssets?.Contains("compile") == true)
                 {
                     return;
                 }
 
                 // Add the package to the list of accumulated packages.
-                accumulated.Add(new ProjectPackage(project, package));
+                accumulated.Add(new ProjectPackage(project, package, sourceCacheContext, resolvedPackages));
+            }
+
+            // analyze accumulated packages for redundant transitive dependencies
+            foreach (var package in project.Packages)
+            {
+                var otherPackages = accumulated.Where(p => p.Package.Name != package.Name);
+                var transitiveParent = otherPackages.FirstOrDefault(op => op.PackageDependencies.TryGetValue(package.Name, out Package pd) && pd.IsSameVersion(package));
+                if (transitiveParent != null)
+                {
+                    result.Add(new PackageToRemove(project, package, transitiveParent));
+                }
             }
 
             return accumulated;

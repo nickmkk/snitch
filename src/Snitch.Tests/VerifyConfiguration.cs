@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using VerifyTests;
-using VerifyXunit;
 
 namespace Sntich.Tests
 {
@@ -9,7 +8,7 @@ namespace Sntich.Tests
         [ModuleInitializer]
         public static void Init()
         {
-            Verifier.DerivePathInfo(Expectations.Initialize);
+            VerifierSettings.DerivePathInfo(Expectations.Initialize);
         }
     }
 }

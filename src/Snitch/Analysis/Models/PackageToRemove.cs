@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Snitch.Analysis
 {
@@ -10,8 +11,8 @@ namespace Snitch.Analysis
         public Package Package { get; }
         public ProjectPackage Original { get; }
 
-        public bool CanBeRemoved => Package.IsSameVersion(Original.Package);
-        public bool VersionMismatch => !Package.IsSameVersion(Original.Package);
+        public bool CanBeRemoved => Package.IsSameVersion(Original.Package) || (Original.PackageDependencies.TryGetValue(Package.Name, out Package pd) && Package.IsSameVersion(pd));
+        public bool VersionMismatch => !Package.IsSameVersion(Original.Package) && !(Original.PackageDependencies.TryGetValue(Package.Name, out Package pd) && Package.IsSameVersion(pd));
 
         public PackageToRemove(Project project, Package package, ProjectPackage original)
         {
@@ -22,7 +23,7 @@ namespace Snitch.Analysis
 
         private string PackageDescription()
         {
-            return $"{Project.Name}: {Package.Name} ({Original.Project.Name})";
+            return $"{Project.Name}: {Package.Name} ({Original.Project?.Name ?? Original.Package.Name})";
         }
     }
 }
