@@ -7,9 +7,11 @@
     <NoWarn>1701;1702;SA0001</NoWarn>
     <Nullable>enable</Nullable>
     <PackAsTool>true</PackAsTool>
+    <PackageId>nickmkk.snitch</PackageId>
     <ToolCommandName>snitch</ToolCommandName>
     <PackageIcon>icon.png</PackageIcon>
     <DebugType>full</DebugType>
+    <Version>1.0.0-alpha</Version>
   </PropertyGroup>
 
   <!-- NuGet package info -->
@@ -42,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(SolutionDir)..\src\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
