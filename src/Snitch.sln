@@ -9,6 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Snitch.Tests", "Snitch.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Depends.Core", "Depends.Core\Depends.Core.csproj", "{B3DA518B-710D-4A62-A91C-52F7CD448269}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{20C5363F-72FF-4705-8747-1808C0514950}"
+	ProjectSection(SolutionItems) = preProject
+		..\publish.ps1 = ..\publish.ps1
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
