@@ -79,7 +79,7 @@ Analyzing Boom...
 ## Installation
 
 ```
-> dotnet tool install -g snitch
+> dotnet tool install -g nickmkk.snitch
 ```
 
 ## Usage
