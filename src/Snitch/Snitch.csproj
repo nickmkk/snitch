@@ -16,10 +16,8 @@
 
   <!-- NuGet package info -->
   <PropertyGroup>
-    <Description>A tool that help you find transitive package references.</Description>
-    <Company>Spectre Systems AB</Company>
-    <Copyright>Spectre Systems AB</Copyright>
-    <Authors>Patrik Svensson</Authors>
+    <Description>A tool that helps you find transitive package references.</Description>
+    <Authors>Patrik Svensson, Scott Mcnally, Nick Markkula</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
