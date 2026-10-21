@@ -15,7 +15,7 @@ namespace Snitch.Analysis
     [DebuggerDisplay("{PackageDescription(),nq}")]
     internal sealed class ProjectPackage
     {
-        private static readonly DependencyAnalyzer _dependencyAnalyzer = new(new LoggerFactory());       
+        private static readonly DependencyAnalyzer _dependencyAnalyzer = new DependencyAnalyzer(new LoggerFactory());
 
         public Project Project { get; }
 

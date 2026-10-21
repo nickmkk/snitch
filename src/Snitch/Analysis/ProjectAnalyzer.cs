@@ -103,7 +103,7 @@ namespace Snitch.Analysis
             foreach (var package in project.Packages)
             {
                 var otherPackages = accumulated.Where(p => p.Package.Name != package.Name);
-                var transitiveParent = otherPackages.FirstOrDefault(op => op.PackageDependencies.TryGetValue(package.Name, out Package pd) && pd.IsSameVersion(package));
+                var transitiveParent = otherPackages.FirstOrDefault(op => op.PackageDependencies.TryGetValue(package.Name, out var pd) && pd.IsSameVersion(package));
                 if (transitiveParent != null)
                 {
                     result.Add(new PackageToRemove(project, package, transitiveParent));

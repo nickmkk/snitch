@@ -11,8 +11,8 @@ namespace Snitch.Analysis
         public Package Package { get; }
         public ProjectPackage Original { get; }
 
-        public bool CanBeRemoved => Package.IsSameVersion(Original.Package) || (Original.PackageDependencies.TryGetValue(Package.Name, out Package pd) && Package.IsSameVersion(pd));
-        public bool VersionMismatch => !Package.IsSameVersion(Original.Package) && !(Original.PackageDependencies.TryGetValue(Package.Name, out Package pd) && Package.IsSameVersion(pd));
+        public bool CanBeRemoved => Package.IsSameVersion(Original.Package) || (Original.PackageDependencies.TryGetValue(Package.Name, out var pd) && Package.IsSameVersion(pd));
+        public bool VersionMismatch => !Package.IsSameVersion(Original.Package) && !(Original.PackageDependencies.TryGetValue(Package.Name, out var pd) && Package.IsSameVersion(pd));
 
         public PackageToRemove(Project project, Package package, ProjectPackage original)
         {

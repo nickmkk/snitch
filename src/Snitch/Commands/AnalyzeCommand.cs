@@ -1,9 +1,3 @@
-using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
-using Snitch.Analysis;
-using Snitch.Analysis.Utilities;
-using Spectre.Console;
-using Spectre.Console.Cli;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,6 +5,12 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
+using Snitch.Analysis;
+using Snitch.Analysis.Utilities;
+using Spectre.Console;
+using Spectre.Console.Cli;
 
 namespace Snitch.Commands
 {
