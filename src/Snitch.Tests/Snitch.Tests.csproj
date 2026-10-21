@@ -11,7 +11,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageReference Include="Shouldly" Version="4.2.1" />
+    <PackageReference Include="Shouldly" Version="4.1.0" />
     <PackageReference Include="SimpleExec" Version="8.0.0" />
     <PackageReference Include="Spectre.Console.Testing" Version="0.43.0" />
     <PackageReference Include="Spectre.Verify.Extensions" Version="0.5.0" />
