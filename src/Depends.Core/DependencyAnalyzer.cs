@@ -22,7 +22,20 @@ using Microsoft.Build.Construction;
 namespace Depends.Core
 {
     public class DependencyAnalyzer
-    {   
+    {
+        private const int MaxConcurrentFeedRequests = 8;
+
+        private static readonly Lazy<ISettings> _settings = new Lazy<ISettings>(
+            () => Settings.LoadDefaultSettings(root: null, configFileName: null, machineWideSettings: null));
+
+        private static readonly Lazy<SourceRepositoryProvider> _sourceRepositoryProvider = new Lazy<SourceRepositoryProvider>(
+            () => new SourceRepositoryProvider(new PackageSourceProvider(_settings.Value), Repository.Provider.GetCoreV3()));
+
+        private static readonly Lazy<IReadOnlyList<SourceRepository>> _repositories = new Lazy<IReadOnlyList<SourceRepository>>(
+            () => _sourceRepositoryProvider.Value.GetRepositories().ToList());
+
+        private static readonly SemaphoreSlim _feedThrottle = new SemaphoreSlim(MaxConcurrentFeedRequests);
+
         static DependencyAnalyzer()
         {
             _ = typeof(NuGet.Common.LogLevel);
@@ -46,16 +59,15 @@ namespace Depends.Core
         public DependencyGraph Analyze(string packageId, NuGetVersion version, string framework, SourceCacheContext cacheContext, ConcurrentDictionary<PackageIdentity, SourcePackageDependencyInfo> resolvedPackages)
         {
             var package = new PackageIdentity(packageId, version);
-            var settings = Settings.LoadDefaultSettings(root: null, configFileName: null, machineWideSettings: null);
-            var sourceRepositoryProvider = new SourceRepositoryProvider(new PackageSourceProvider(settings), Repository.Provider.GetCoreV3());
+            var settings = _settings.Value;
+            var repositories = _repositories.Value;
             var nuGetFramework = NuGetFramework.ParseFolder(framework);
             var nugetLogger = _logger.AsNuGetLogger();
 
             //using (var cacheContext = new SourceCacheContext())
             //{
-                var repositories = sourceRepositoryProvider.GetRepositories();
                 ResolvePackage(package, nuGetFramework, cacheContext, nugetLogger, repositories, resolvedPackages).Wait();
-               
+
                 var availablePackages = new HashSet<SourcePackageDependencyInfo>(resolvedPackages.Values);
 
                 var resolverContext = new PackageResolverContext(
@@ -65,7 +77,7 @@ namespace Depends.Core
                     Enumerable.Empty<PackageReference>(),
                     Enumerable.Empty<PackageIdentity>(),
                     availablePackages,
-                    sourceRepositoryProvider.GetRepositories().Select(s => s.PackageSource),
+                    repositories.Select(s => s.PackageSource),
                     nugetLogger);
 
                 var resolver = new PackageResolver();
@@ -146,9 +158,25 @@ namespace Depends.Core
 
             foreach (var sourceRepository in repositories)
             {
-                var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
-                var dependencyInfo = await dependencyInfoResource.ResolvePackage(
-                    package, framework, cacheContext, logger, CancellationToken.None);
+                SourcePackageDependencyInfo dependencyInfo;
+                await _feedThrottle.WaitAsync();
+                try
+                {
+                    var dependencyInfoResource = await sourceRepository.GetResourceAsync<DependencyInfoResource>();
+                    dependencyInfo = await dependencyInfoResource.ResolvePackage(
+                        package, framework, cacheContext, logger, CancellationToken.None);
+                }
+                catch (Exception ex) when (ex is NuGet.Protocol.Core.Types.FatalProtocolException || ex is System.Net.Http.HttpRequestException)
+                {
+                    // A source that doesn't host the package (or is unreachable) must not abort
+                    // the analysis; fall through to the remaining sources.
+                    _logger.LogDebug(ex, "Failed to resolve {Package} from source {Source}.", package, sourceRepository.PackageSource.Name);
+                    continue;
+                }
+                finally
+                {
+                    _feedThrottle.Release();
+                }
 
                 if (dependencyInfo == null)
                 {
@@ -163,6 +191,9 @@ namespace Depends.Core
                             framework, cacheContext, logger, repositories, availablePackages);
                     }));
                 }
+
+                // Package resolved; no need to query the remaining sources.
+                break;
             }
         }
 

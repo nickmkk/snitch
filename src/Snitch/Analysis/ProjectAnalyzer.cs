@@ -99,14 +99,23 @@ namespace Snitch.Analysis
                 accumulated.Add(new ProjectPackage(project, package, sourceCacheContext, resolvedPackages));
             }
 
-            // analyze accumulated packages for redundant transitive dependencies
-            foreach (var package in project.Packages)
+            // Analyze accumulated packages for redundant transitive dependencies.
+            // Only report packages declared directly by the root project, once each.
+            if (project.Name.Equals(root.Name, StringComparison.OrdinalIgnoreCase))
             {
-                var otherPackages = accumulated.Where(p => p.Package.Name != package.Name);
-                var transitiveParent = otherPackages.FirstOrDefault(op => op.PackageDependencies.TryGetValue(package.Name, out Package pd) && pd.IsSameVersion(package));
-                if (transitiveParent != null)
+                foreach (var package in project.Packages)
                 {
-                    result.Add(new PackageToRemove(project, package, transitiveParent));
+                    if (result.ContainsPackage(package))
+                    {
+                        continue;
+                    }
+
+                    var otherPackages = accumulated.Where(p => !p.Package.Name.Equals(package.Name, StringComparison.OrdinalIgnoreCase));
+                    var transitiveParent = otherPackages.FirstOrDefault(op => op.PackageDependencies.TryGetValue(package.Name, out var pd) && pd.IsSameVersion(package));
+                    if (transitiveParent != null)
+                    {
+                        result.Add(new PackageToRemove(project, package, transitiveParent));
+                    }
                 }
             }
 
