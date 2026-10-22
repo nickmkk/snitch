@@ -89,3 +89,6 @@ Thumbs.db
 
 # Rider
 .idea/
+# Copilot upgrade agent artifacts (keep CI workflows tracked)
+.github/*
+!.github/workflows/
